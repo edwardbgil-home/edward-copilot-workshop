@@ -1,0 +1,21 @@
+{
+  "name": "edward-copilot-workshop",
+  "version": "1.0.0",
+  "description": "A task manager demo for the Copilot workshop",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.6.2"
+  }
+}

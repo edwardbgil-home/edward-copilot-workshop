@@ -7,15 +7,36 @@ import {
   listTasks,
   updateTask
 } from './services/taskService.js';
+import { colorizeStatus, colorizePriority } from './utils/colors.js';
+
+/**
+ * Returns a copy of a task with status and priority replaced by colorized strings.
+ * @param {object} task The task object to format.
+ * @returns {object} A shallow copy of the task with colorized status and priority.
+ */
+function formatTask(task) {
+  return {
+    ...task,
+    status: colorizeStatus(task.status),
+    priority: colorizePriority(task.priority),
+  };
+}
 
 /**
  * Logs a section header and value for demo readability.
+ * Task objects and arrays of task objects are printed with colorized status and priority.
  * @param {string} title Section title.
  * @param {unknown} value Value to print.
  */
 function printSection(title, value) {
   console.log(`\n=== ${title} ===`);
-  console.log(value);
+  if (Array.isArray(value)) {
+    value.forEach(task => console.log(formatTask(task)));
+  } else if (value && typeof value === 'object' && 'status' in value && 'priority' in value) {
+    console.log(formatTask(value));
+  } else {
+    console.log(value);
+  }
 }
 
 /**
