@@ -9,6 +9,7 @@ import {
   validateDescription,
   validateIsoTimestamp,
   validateListOptions,
+  validateCategory,
   validatePriority,
   validateReadonlyFields,
   validateStatus,
@@ -96,6 +97,17 @@ test('validatePriority throws for unsupported priority', () => {
   );
 });
 
+test('validateCategory accepts non-empty category', () => {
+  assert.equal(validateCategory('  work  ', true), 'work');
+});
+
+test('validateCategory throws for empty category', () => {
+  assert.throws(
+    () => validateCategory('   ', true),
+    /category must be a non-empty string/
+  );
+});
+
 test('validateIsoTimestamp accepts parseable timestamp strings', () => {
   assert.doesNotThrow(() => validateIsoTimestamp(new Date().toISOString(), 'createdAt'));
 });
@@ -125,7 +137,8 @@ test('validateTaskCreateInput returns sanitized payload with defaults', () => {
     title: 'Task',
     description: '',
     status: 'todo',
-    priority: 'medium'
+    priority: 'medium',
+    category: 'general'
   });
 });
 
@@ -185,6 +198,7 @@ test('validateListOptions returns defaults for empty object', () => {
   assert.deepEqual(options, {
     filterStatus: undefined,
     filterPriority: undefined,
+    filterCategory: undefined,
     sortBy: 'createdAt',
     sortOrder: 'asc'
   });
@@ -194,6 +208,7 @@ test('validateListOptions validates filters and sorting', () => {
   const options = validateListOptions({
     filterStatus: 'todo',
     filterPriority: 'high',
+    filterCategory: 'work',
     sortBy: 'priority',
     sortOrder: 'desc'
   });
@@ -201,6 +216,7 @@ test('validateListOptions validates filters and sorting', () => {
   assert.deepEqual(options, {
     filterStatus: 'todo',
     filterPriority: 'high',
+    filterCategory: 'work',
     sortBy: 'priority',
     sortOrder: 'desc'
   });

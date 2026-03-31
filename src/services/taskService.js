@@ -1,11 +1,9 @@
 import { Task } from '../models/task.js';
-import {
-  TASK_PRIORITIES,
-  validateListOptions,
-  validateTaskId
-} from '../utils/validators.js';
+import { TASK_PRIORITIES, validateCategory, validateListOptions, validateTaskId } from '../utils/validators.js';
 
+/** @type {Task[]} */
 const tasks = [];
+
 const priorityRank = TASK_PRIORITIES.reduce((accumulator, priority, index) => {
   accumulator[priority] = index;
   return accumulator;
@@ -20,6 +18,7 @@ const priorityRank = TASK_PRIORITIES.reduce((accumulator, priority, index) => {
  * description: string,
  * status: string,
  * priority: string,
+ * category: string,
  * createdAt: string,
  * updatedAt: string
  * }} Created task.
@@ -39,12 +38,13 @@ export function createTask(input) {
  * description: string,
  * status: string,
  * priority: string,
+ * category: string,
  * createdAt: string,
  * updatedAt: string
  * }>} Matching tasks.
  */
 export function listTasks(options) {
-  const { filterStatus, filterPriority, sortBy, sortOrder } = validateListOptions(options);
+  const { filterStatus, filterPriority, filterCategory, sortBy, sortOrder } = validateListOptions(options);
 
   const filteredTasks = tasks.filter((task) => {
     if (filterStatus && task.status !== filterStatus) {
@@ -52,6 +52,10 @@ export function listTasks(options) {
     }
 
     if (filterPriority && task.priority !== filterPriority) {
+      return false;
+    }
+
+    if (filterCategory && task.category !== filterCategory) {
       return false;
     }
 
@@ -74,6 +78,37 @@ export function listTasks(options) {
 }
 
 /**
+ * Lists all tasks that belong to a specific category.
+ * @param {unknown} category Category name.
+ * @returns {Array<{
+ * id: string,
+ * title: string,
+ * description: string,
+ * status: string,
+ * priority: string,
+ * category: string,
+ * createdAt: string,
+ * updatedAt: string
+ * }>} Matching tasks.
+ */
+export function filterTasksByCategory(category) {
+  const normalizedCategory = validateCategory(category, true);
+
+  return tasks
+    .filter((task) => task.category === normalizedCategory)
+    .map((task) => task.toJSON());
+}
+
+/**
+ * Lists unique task categories.
+ * @returns {string[]} Unique category names sorted alphabetically.
+ */
+export function listCategories() {
+  const categories = tasks.map((task) => task.category);
+  return [...new Set(categories)].sort((leftCategory, rightCategory) => leftCategory.localeCompare(rightCategory));
+}
+
+/**
  * Gets a single task by id.
  * @param {unknown} id Task id.
  * @returns {{
@@ -82,6 +117,7 @@ export function listTasks(options) {
  * description: string,
  * status: string,
  * priority: string,
+ * category: string,
  * createdAt: string,
  * updatedAt: string
  * }} Matching task.
@@ -108,6 +144,7 @@ export function getTask(id) {
  * description: string,
  * status: string,
  * priority: string,
+ * category: string,
  * createdAt: string,
  * updatedAt: string
  * }} Updated task.
@@ -134,6 +171,7 @@ export function updateTask(id, input) {
  * description: string,
  * status: string,
  * priority: string,
+ * category: string,
  * createdAt: string,
  * updatedAt: string
  * }} Deleted task.

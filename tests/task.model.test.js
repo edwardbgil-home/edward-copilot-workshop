@@ -13,6 +13,7 @@ test('Task.create returns a valid task with defaults', () => {
   assert.equal(json.description, '');
   assert.equal(json.status, 'todo');
   assert.equal(json.priority, 'medium');
+  assert.equal(json.category, 'general');
   assert.equal(typeof json.createdAt, 'string');
   assert.equal(typeof json.updatedAt, 'string');
 });
@@ -58,6 +59,14 @@ test('Task.update applies valid fields and updates updatedAt', async () => {
   assert.equal(task.status, 'in-progress');
   assert.equal(task.priority, 'high');
   assert.notEqual(task.updatedAt, before);
+});
+
+test('Task.update applies category updates', () => {
+  const task = Task.create({ title: 'Categorize me' });
+
+  task.update({ category: 'work' });
+
+  assert.equal(task.category, 'work');
 });
 
 test('Task.update rejects empty updates', () => {

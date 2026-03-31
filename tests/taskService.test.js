@@ -16,11 +16,13 @@ test('createTask stores and returns created task', async () => {
   const created = service.createTask({
     title: 'Write tests',
     status: 'todo',
-    priority: 'high'
+    priority: 'high',
+    category: 'work'
   });
 
   const all = service.listTasks();
   assert.equal(created.title, 'Write tests');
+  assert.equal(created.category, 'work');
   assert.equal(all.length, 1);
   assert.equal(all[0].id, created.id);
 });
@@ -104,6 +106,38 @@ test('listTasks filters by priority', async () => {
   const filtered = service.listTasks({ filterPriority: 'high' });
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0].priority, 'high');
+});
+
+test('filterTasksByCategory returns only tasks in the requested category', async () => {
+  const service = await loadFreshService();
+  service.createTask({ title: 'Write release notes', category: 'work' });
+  service.createTask({ title: 'Buy groceries', category: 'personal' });
+  service.createTask({ title: 'Plan sprint', category: 'work' });
+
+  const filtered = service.filterTasksByCategory('work');
+  assert.equal(filtered.length, 2);
+  assert.deepEqual(filtered.map((task) => task.category), ['work', 'work']);
+});
+
+test('listCategories returns unique category values', async () => {
+  const service = await loadFreshService();
+  service.createTask({ title: 'One', category: 'work' });
+  service.createTask({ title: 'Two', category: 'personal' });
+  service.createTask({ title: 'Three', category: 'work' });
+  service.createTask({ title: 'Four' });
+
+  const categories = service.listCategories();
+  assert.deepEqual(categories, ['general', 'personal', 'work']);
+});
+
+test('listTasks supports category filter in list options', async () => {
+  const service = await loadFreshService();
+  service.createTask({ title: 'Task A', category: 'work' });
+  service.createTask({ title: 'Task B', category: 'personal' });
+
+  const filtered = service.listTasks({ filterCategory: 'personal' });
+  assert.equal(filtered.length, 1);
+  assert.equal(filtered[0].category, 'personal');
 });
 
 test('listTasks sorts by priority ascending', async () => {

@@ -13,6 +13,7 @@ The primary entity. Stored in-memory as a plain JavaScript object.
 | `description` | `string` | No       | Defaults to `''` when omitted. No length constraint.  |
 | `status`      | `string` | Yes      | One of `'todo'`, `'in-progress'`, `'done'`. Defaults to `'todo'` on create. |
 | `priority`    | `string` | Yes      | One of `'low'`, `'medium'`, `'high'`. Defaults to `'medium'` on create. |
+| `category`    | `string` | No       | Non-empty string after trimming; defaults to `'general'` on create. |
 | `createdAt`   | `string` | Yes      | ISO 8601 timestamp. Set once on create. Read-only after creation. |
 | `updatedAt`   | `string` | Yes      | ISO 8601 timestamp. Set on create and refreshed on every update. |
 
@@ -54,6 +55,13 @@ The following rules are enforced by `src/validation/task-validation.js` before a
 - Read-only: rejected if supplied in `TaskCreateInput` or `TaskUpdateInput`.
 - Format is always ISO 8601 (e.g., `'2026-03-31T12:00:00.000Z'`).
 
+**`category`**
+- Optional in both `TaskCreateInput` and `TaskUpdateInput`.
+- Must be of type `string` when provided.
+- Must be non-empty after `.trim()`.
+- Defaults to `'general'` on create when omitted or `undefined`.
+- Used by `ListOptions.filterCategory` for exact category matching.
+
 **`updatedAt`**
 - Set to the same value as `createdAt` when the task is first created.
 - Refreshed to `now()` on every successful `updateTask()` call.
@@ -66,9 +74,12 @@ The following rules are enforced by `src/validation/task-validation.js` before a
 |-------------------|------------------------------------------------------------|-----------------------------|
 | `TaskStatus`      | `'todo' \| 'in-progress' \| 'done'`                       | `task.js`, `task-validation.js`, `enums.js` |
 | `TaskPriority`    | `'low' \| 'medium' \| 'high'`                             | `task.js`, `task-validation.js`, `enums.js` |
-| `TaskCreateInput` | `{ title: string; description?: string; status?: TaskStatus; priority?: TaskPriority }` | `task-service.js`, `task-validation.js` |
-| `TaskUpdateInput` | `{ title?: string; description?: string; status?: TaskStatus; priority?: TaskPriority }` | `task-service.js`, `task-validation.js` |
-| `ListOptions`     | `{ filterStatus?: TaskStatus; filterPriority?: TaskPriority; sortBy?: 'priority'\|'createdAt'; sortOrder?: 'asc'\|'desc' }` | `task-service.js`, `task-validation.js` |
+| `TaskCategory`    | `string`                                                    | `task.js`, `task-validation.js`, `task-service.js` |
+| `TaskCreateInput` | `{ title: string; description?: string; status?: TaskStatus; priority?: TaskPriority; category?: string }` | `task-service.js`, `task-validation.js` |
+| `TaskUpdateInput` | `{ title?: string; description?: string; status?: TaskStatus; priority?: TaskPriority; category?: string }` | `task-service.js`, `task-validation.js` |
+| `ListOptions`     | `{ filterStatus?: TaskStatus; filterPriority?: TaskPriority; filterCategory?: TaskCategory; sortBy?: 'priority'\|'createdAt'; sortOrder?: 'asc'\|'desc' }` | `task-service.js`, `task-validation.js` |
+
+`filterCategory` compares using exact string equality against `Task.category`.
 
 ---
 
@@ -159,6 +170,8 @@ docs/
 - `addTask(input)` – validates input, creates and stores a task, returns the new `Task`
 - `getTask(id)` – returns the matching `Task` or throws a not-found `Error`
 - `listTasks(options?)` – returns a filtered and sorted `Task[]`
+- `filterTasksByCategory(category)` – returns tasks in a specific category
+- `listCategories()` – returns unique category values
 - `updateTask(id, input)` – validates input, merges changes, refreshes `updatedAt`, returns the updated `Task`
 - `deleteTask(id)` – removes the task or throws a not-found `Error`
 

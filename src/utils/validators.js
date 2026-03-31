@@ -1,7 +1,9 @@
-const TASK_STATUSES = ['todo', 'in-progress', 'done'];
-const TASK_PRIORITIES = ['low', 'medium', 'high'];
-const SORT_FIELDS = ['priority', 'createdAt'];
-const SORT_ORDERS = ['asc', 'desc'];
+import { PRIORITIES, STATUSES } from '../constants/enums.js';
+import {
+  validateCreateInput,
+  validateListOptions as validateSchemaListOptions,
+  validateUpdateInput
+} from '../validation/task-validation.js';
 
 /**
  * Checks whether the provided value is a non-empty string after trimming.
@@ -83,8 +85,8 @@ export function validateStatus(status, required) {
     return undefined;
   }
 
-  if (typeof status !== 'string' || !TASK_STATUSES.includes(status)) {
-    throw new Error(`status must be one of: ${TASK_STATUSES.join(', ')}`);
+  if (typeof status !== 'string' || !STATUSES.includes(status)) {
+    throw new Error(`status must be one of: ${STATUSES.join(', ')}`);
   }
 
   return status;
@@ -101,11 +103,29 @@ export function validatePriority(priority, required) {
     return undefined;
   }
 
-  if (typeof priority !== 'string' || !TASK_PRIORITIES.includes(priority)) {
-    throw new Error(`priority must be one of: ${TASK_PRIORITIES.join(', ')}`);
+  if (typeof priority !== 'string' || !PRIORITIES.includes(priority)) {
+    throw new Error(`priority must be one of: ${PRIORITIES.join(', ')}`);
   }
 
   return priority;
+}
+
+/**
+ * Validates category value.
+ * @param {unknown} category The category to validate.
+ * @param {boolean} required Whether category is required.
+ * @returns {string|undefined} The validated category.
+ */
+export function validateCategory(category, required) {
+  if (category === undefined && !required) {
+    return undefined;
+  }
+
+  if (typeof category !== 'string' || category.trim().length === 0) {
+    throw new Error('category must be a non-empty string');
+  }
+
+  return category.trim();
 }
 
 /**
@@ -135,91 +155,32 @@ export function validateReadonlyFields(input) {
 /**
  * Validates task creation input.
  * @param {unknown} input The input to validate.
- * @returns {{ title: string, description: string, status: string, priority: string }} Sanitized create payload.
+ * @returns {{ title: string, description: string, status: string, priority: string, category: string }} Sanitized create payload.
  */
 export function validateTaskCreateInput(input) {
-  const payload = ensureObject(input, 'Task create input');
-  validateReadonlyFields(payload);
-
-  const title = validateTitle(payload.title, true);
-  const description = validateDescription(payload.description, false) ?? '';
-  const status = validateStatus(payload.status, false) ?? 'todo';
-  const priority = validatePriority(payload.priority, false) ?? 'medium';
-
-  return { title, description, status, priority };
+  return validateCreateInput(input);
 }
 
 /**
  * Validates task update input.
  * @param {unknown} input The input to validate.
- * @returns {{ title?: string, description?: string, status?: string, priority?: string }} Sanitized update payload.
+ * @returns {{ title?: string, description?: string, status?: string, priority?: string, category?: string }} Sanitized update payload.
  */
 export function validateTaskUpdateInput(input) {
-  const payload = ensureObject(input, 'Task update input');
-  validateReadonlyFields(payload);
-
-  const allowedFields = ['title', 'description', 'status', 'priority'];
-  const providedFields = Object.keys(payload).filter((key) => allowedFields.includes(key));
-
-  if (providedFields.length === 0) {
-    throw new Error('update input must include at least one field');
-  }
-
-  const updates = {};
-
-  if ('title' in payload) {
-    updates.title = validateTitle(payload.title, true);
-  }
-
-  if ('description' in payload) {
-    updates.description = validateDescription(payload.description, true);
-  }
-
-  if ('status' in payload) {
-    updates.status = validateStatus(payload.status, true);
-  }
-
-  if ('priority' in payload) {
-    updates.priority = validatePriority(payload.priority, true);
-  }
-
-  return updates;
+  return validateUpdateInput(input);
 }
 
 /**
  * Validates list/filter/sort options.
  * @param {unknown} options The options to validate.
- * @returns {{ filterStatus?: string, filterPriority?: string, sortBy: string, sortOrder: string }} Sanitized list options.
+ * @returns {{ filterStatus?: string, filterPriority?: string, filterCategory?: string, sortBy: string, sortOrder: string }} Sanitized list options.
  */
 export function validateListOptions(options) {
-  if (options === undefined) {
-    return { sortBy: 'createdAt', sortOrder: 'asc' };
-  }
-
-  const payload = ensureObject(options, 'List options');
-
-  const filterStatus = validateStatus(payload.filterStatus, false);
-  const filterPriority = validatePriority(payload.filterPriority, false);
-
-  let sortBy = 'createdAt';
-  if (payload.sortBy !== undefined) {
-    if (typeof payload.sortBy !== 'string' || !SORT_FIELDS.includes(payload.sortBy)) {
-      throw new Error(`sortBy must be one of: ${SORT_FIELDS.join(', ')}`);
-    }
-
-    sortBy = payload.sortBy;
-  }
-
-  let sortOrder = 'asc';
-  if (payload.sortOrder !== undefined) {
-    if (typeof payload.sortOrder !== 'string' || !SORT_ORDERS.includes(payload.sortOrder)) {
-      throw new Error(`sortOrder must be one of: ${SORT_ORDERS.join(', ')}`);
-    }
-
-    sortOrder = payload.sortOrder;
-  }
-
-  return { filterStatus, filterPriority, sortBy, sortOrder };
+  return validateSchemaListOptions(options);
 }
 
-export { TASK_PRIORITIES, TASK_STATUSES };
+/** @type {string[]} */
+export const TASK_PRIORITIES = [...PRIORITIES];
+
+/** @type {string[]} */
+export const TASK_STATUSES = [...STATUSES];

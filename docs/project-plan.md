@@ -1,7 +1,7 @@
 # Task Manager CLI Project Plan
 
 ## 1. Project overview
-Task Manager CLI is a lightweight Node.js 20+ command-line application for managing personal tasks in memory with no external dependencies. Users can create, list, update, and delete tasks, then quickly filter by status or priority and sort by priority or creation date to focus on what matters next. The app is intentionally scoped for workshop learning, emphasizing clear modular design, predictable validation, and testable business logic.
+Task Manager CLI is a lightweight Node.js 20+ command-line application for managing personal tasks in memory with no external dependencies. Users can create, list, update, and delete tasks, then quickly filter by status, priority, or category and sort by priority or creation date to focus on what matters next. The app is intentionally scoped for workshop learning, emphasizing clear modular design, predictable validation, and testable business logic.
 
 ## 2. User stories
 1. As a user, I want to create a task so I can track new work items.
@@ -30,6 +30,12 @@ Task Manager CLI is a lightweight Node.js 20+ command-line application for manag
    - Acceptance criteria: Sorting by creation date supports `newest` and `oldest` order.
    - Acceptance criteria: Invalid sort options return validation errors.
 
+7. As a user, I want to organize tasks by category so I can group related work.
+   - Acceptance criteria: When category is omitted at create time, the task is assigned category `general`.
+   - Acceptance criteria: When category is provided at create time, it must be a non-empty string and is saved on the task.
+   - Acceptance criteria: The system can return tasks filtered by an exact category match.
+   - Acceptance criteria: The system can list all unique categories currently used by tasks.
+
 ## 3. Data model
 - Entity: `Task`
   - `id`: `string` (generated with `crypto.randomUUID()`)
@@ -37,6 +43,7 @@ Task Manager CLI is a lightweight Node.js 20+ command-line application for manag
   - `description`: `string` (optional, defaults to `""`)
   - `status`: `"todo" | "in-progress" | "done"`
   - `priority`: `"low" | "medium" | "high"`
+   - `category`: `string` (optional input, defaults to `"general"`)
   - `createdAt`: `string` (ISO 8601 timestamp)
   - `updatedAt`: `string` (ISO 8601 timestamp)
 
@@ -46,8 +53,8 @@ Task Manager CLI is a lightweight Node.js 20+ command-line application for manag
 - Supporting types
   - `TaskStatus`: `"todo" | "in-progress" | "done"`
   - `TaskPriority`: `"low" | "medium" | "high"`
-  - `TaskCreateInput`: `{ title: string; description?: string; status?: TaskStatus; priority?: TaskPriority }`
-  - `TaskUpdateInput`: `{ title?: string; description?: string; status?: TaskStatus; priority?: TaskPriority }`
+   - `TaskCreateInput`: `{ title: string; description?: string; status?: TaskStatus; priority?: TaskPriority; category?: string }`
+   - `TaskUpdateInput`: `{ title?: string; description?: string; status?: TaskStatus; priority?: TaskPriority; category?: string }`
 
 ## 4. File structure
 ```text
@@ -82,6 +89,7 @@ src/
 3. Milestone 3: Core task service
    - Build in-memory store and CRUD operations.
    - Add filter by status/priority.
+   - Add filter by category and list unique categories.
    - Add sorting by priority and creation date.
 
 4. Milestone 4: CLI command integration
@@ -91,5 +99,5 @@ src/
 
 5. Milestone 5: Verification and polish
    - Add lightweight checks using Node.js built-ins (`assert`) where appropriate.
-   - Verify edge cases: empty lists, invalid input, unknown ids.
+   - Verify edge cases: empty lists, invalid input, unknown ids, category defaults, and unique category output.
    - Refine output messages for clarity and workshop readability.

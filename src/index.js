@@ -1,7 +1,9 @@
 import {
   createTask,
   deleteTask,
+  filterTasksByCategory,
   getTask,
+  listCategories,
   listTasks,
   updateTask
 } from './services/taskService.js';
@@ -24,27 +26,32 @@ function runDemo() {
     title: 'Write workshop docs',
     description: 'Draft the README and exercise guidance',
     status: 'todo',
-    priority: 'high'
+    priority: 'high',
+    category: 'work'
   });
 
   const secondTask = createTask({
     title: 'Review project plan',
     description: 'Confirm milestones with stakeholders',
     status: 'in-progress',
-    priority: 'medium'
+    priority: 'medium',
+    category: 'work'
   });
 
   const thirdTask = createTask({
     title: 'Archive old notes',
     description: '',
     status: 'done',
-    priority: 'low'
+    priority: 'low',
+    category: 'personal'
   });
 
   printSection('Create tasks', [firstTask, secondTask, thirdTask]);
   printSection('List all tasks', listTasks());
   printSection('Filter by status: todo', listTasks({ filterStatus: 'todo' }));
   printSection('Filter by priority: high', listTasks({ filterPriority: 'high' }));
+  printSection('Filter by category: work', filterTasksByCategory('work'));
+  printSection('List categories', listCategories());
   printSection('Sort by priority asc', listTasks({ sortBy: 'priority', sortOrder: 'asc' }));
   printSection('Sort by creation date desc', listTasks({ sortBy: 'createdAt', sortOrder: 'desc' }));
 
