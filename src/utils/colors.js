@@ -4,7 +4,7 @@ import chalk from 'chalk';
  * Wraps a task status value in the appropriate chalk color.
  * - 'done' → green
  * - 'in-progress' → yellow
- * - 'todo' → red
+ * - 'todo' → cyan
  * @param {string} status The task status value.
  * @returns {string} The colorized status string.
  */
@@ -15,7 +15,7 @@ export function colorizeStatus(status) {
     case 'in-progress':
       return chalk.yellow(status);
     case 'todo':
-      return chalk.red(status);
+      return chalk.cyan(status);
     default:
       return status;
   }
