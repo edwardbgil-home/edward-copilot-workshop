@@ -30,7 +30,7 @@ function printSection(title, value) {
   console.log(`\n=== ${title} ===`);
   if (Array.isArray(value)) {
     value.forEach(task => console.log(formatTask(task)));
-  } else if (value && typeof value === 'object' && 'status' in value) {
+  } else if (value && typeof value === 'object' && 'status' in value && 'priority' in value) {
     console.log(formatTask(value));
   } else {
     console.log(value);
